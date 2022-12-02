@@ -34,4 +34,9 @@ public class DemoController {
 		System.out.println("update...");
 		return "update string";
 	}
+
+	@GetMapping("logout")
+	public String logout() {
+		return "logout";
+	}
 }

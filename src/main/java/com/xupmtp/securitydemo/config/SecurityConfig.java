@@ -17,6 +17,9 @@ public class SecurityConfig {
 	// userDetailsService透過@Bean自動註冊, 不使用Autowired注入, 試試這種寫法
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http, UserDetailsService userDetailsService) throws Exception {
+		// 登出, /test/logout記得加白名單,否則會導到登入頁
+		http.logout().logoutUrl("/logout").logoutSuccessUrl("/test/logout");
+
 		// 設置無權限時導入的頁面
 		http.exceptionHandling().accessDeniedPage("/403_page.html");
 
@@ -26,9 +29,9 @@ public class SecurityConfig {
 						//登入URL, 實現由框架完成, 只需指定需要的URL
 						.loginProcessingUrl("/user/login")
 						// 成功時導向頁面
-						.defaultSuccessUrl("/test/index").permitAll()
+						.defaultSuccessUrl("/main.html").permitAll()
 						// 指定不需驗證的URL
-						.and().authorizeHttpRequests().antMatchers("/pass/*").permitAll()
+						.and().authorizeHttpRequests().antMatchers("/test/logout").permitAll()
 						// 指定URL需admins角色才可登入
 //						.antMatchers("/test/hello").hasAnyAuthority("role", "admins")
 						// role權限以"ROLE_XXX"開頭
