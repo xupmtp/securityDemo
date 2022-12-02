@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan(basePackages = "com.xupmtp.securitydemo.mapper")
+@MapperScan(basePackages = "com.xupmtp.securitydemo.mapper") // 指定mapper package路徑
 public class SecurityDemoApplication {
 
 	public static void main(String[] args) {

@@ -23,14 +23,17 @@ public class UserDetailsImpl implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		// QueryMapper包含查詢參數
 		QueryWrapper<Users> query = new QueryWrapper<>();
 		query.eq("name", username);
 		Users res = usersMapper.selectOne(query);
+		// 無此使用者時丟出內建Exception
 		if (res == null) {
 			throw new UsernameNotFoundException("使用者不存在");
 		}
 
 		List<GrantedAuthority> authList = AuthorityUtils.commaSeparatedStringToAuthorityList("role");
+		// 使用查到的password再做驗證
 		return new User(res.getName(), new BCryptPasswordEncoder().encode(res.getPassword()), authList);
 	}
 }
