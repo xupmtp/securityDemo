@@ -17,12 +17,20 @@ public class SecurityConfig {
 	// userDetailsService透過@Bean自動註冊, 不使用Autowired注入, 試試這種寫法
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http, UserDetailsService userDetailsService) throws Exception {
-		return http.formLogin()
-						.defaultSuccessUrl("/test/hello")
-						.and()
-						.authorizeHttpRequests().antMatchers("/test/*")
-						.permitAll()
-						.and()
+		return http.formLogin()// 啟用自定義表單頁面
+// 登入頁設置, 不加使用預設頁
+						.loginPage("/login.html")
+						//登入URL, 實現由框架完成, 只需指定需要的URL
+						.loginProcessingUrl("/user/login")
+						// 成功時導向頁面
+						.defaultSuccessUrl("/test/index").permitAll()
+						// 指定不需驗證的URL
+						.and().authorizeHttpRequests().antMatchers("/pass/*").permitAll()
+						// 指定受保護的URL, 這裡是設置全部(除了上面的白名單)
+						.anyRequest().authenticated()
+						// 關閉CSRF保護
+						.and().csrf().disable()
+						// 使用自訂的登入驗證機制
 						.authenticationProvider(authenticationProvider(userDetailsService)).build();
 	}
 

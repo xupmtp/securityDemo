@@ -13,6 +13,11 @@ public class DemoController {
 
 	@GetMapping("hello")
 	public String hello() {
-		return "Hello Security";
+		return "Hello Simon";
+	}
+
+	@GetMapping("index")
+	public String index() {
+		return "This is index";
 	}
 }
