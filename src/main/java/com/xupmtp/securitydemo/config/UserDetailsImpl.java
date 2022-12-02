@@ -32,7 +32,8 @@ public class UserDetailsImpl implements UserDetailsService {
 			throw new UsernameNotFoundException("使用者不存在");
 		}
 
-		List<GrantedAuthority> authList = AuthorityUtils.commaSeparatedStringToAuthorityList("role");
+		// 指定權限給登入角色(多個以逗號隔開), 也可以透過DB塞值, 若角色和config不同, 則登入返回403
+		List<GrantedAuthority> authList = AuthorityUtils.commaSeparatedStringToAuthorityList("admins,ROLE_adm");
 		// 使用查到的password再做驗證
 		return new User(res.getName(), new BCryptPasswordEncoder().encode(res.getPassword()), authList);
 	}
