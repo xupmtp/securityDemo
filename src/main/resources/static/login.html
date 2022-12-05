@@ -5,9 +5,13 @@
   <title>Login</title>
 </head>
 <body>
+<!--  各input欄位的name必須符合security規範(固定值)-->
   <form action="/user/login" method="post">
     姓名 : <input type="text" name="username" />
     密碼 : <input type="password" name="password" />
+    <br />
+    <input type="checkbox" name="remember-me"/> 自動登入
+    <br/>
     <input type="submit" name="login" value="登入">
   </form>
 </body>

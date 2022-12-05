@@ -1,5 +1,6 @@
 package com.xupmtp.securitydemo.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -9,13 +10,21 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import javax.annotation.Resource;
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity // 單純解決IEDA找不到HttpSecurity問題, 不加不影響執行
 public class SecurityConfig {
 
-	// userDetailsService透過@Bean自動註冊, 不使用Autowired注入, 試試這種寫法
+	@Resource
+	DataSource dataSource;
+
 	@Bean
+	// userDetailsService透過@Bean自動註冊, 不使用Autowired注入, 試試這種寫法
 	SecurityFilterChain filterChain(HttpSecurity http, UserDetailsService userDetailsService) throws Exception {
 		// 登出, /test/logout記得加白名單,否則會導到登入頁
 		http.logout().logoutUrl("/logout").logoutSuccessUrl("/test/logout");
@@ -38,10 +47,26 @@ public class SecurityConfig {
 //						.antMatchers("/test/hello").hasAnyRole("role", "admins")
 						// 指定受保護的URL, 這裡是設置全部(除了上面的白名單)
 						.anyRequest().authenticated()
+						// 啟用自動登入(記住我)功能, 使用注入的datasource
+						.and().rememberMe().tokenRepository(persistentTokenRepository())
+						// 自動登入有效時間(秒)
+						.tokenValiditySeconds(60)
 						// 關閉CSRF保護
 						.and().csrf().disable()
 						// 使用自訂的登入驗證機制
 						.authenticationProvider(authenticationProvider(userDetailsService)).build();
+	}
+
+	/**
+	 * 配置remember me功能使用到的數據來源(datasource)
+	 */
+	@Bean
+	PersistentTokenRepository persistentTokenRepository() {
+		JdbcTokenRepositoryImpl jdbcRepository = new JdbcTokenRepositoryImpl();
+		jdbcRepository.setDataSource(dataSource);
+		// 無table會自動建立
+		jdbcRepository.setCreateTableOnStartup(true);
+		return jdbcRepository;
 	}
 
 	@Bean
