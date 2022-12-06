@@ -1,6 +1,5 @@
 package com.xupmtp.securitydemo.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -33,14 +32,17 @@ public class SecurityConfig {
 		http.exceptionHandling().accessDeniedPage("/403_page.html");
 
 		return http.formLogin()// 啟用自定義表單頁面
-// 登入頁設置, 不加使用預設頁
-						.loginPage("/login.html")
+						// 登入頁設置, 不加使用預設頁
+						// 加入thymeleaf, 改用URL
+						.loginPage("/main/login")
+						.loginProcessingUrl("/main/login")
 						//登入URL, 實現由框架完成, 只需指定需要的URL
 						.loginProcessingUrl("/user/login")
-						// 成功時導向頁面
-						.defaultSuccessUrl("/main.html").permitAll()
+						// 成功時導向頁面 要使用thymeleaf只能透過controller轉發
+//						.defaultSuccessUrl("/main.html").permitAll()
 						// 指定不需驗證的URL
-						.and().authorizeHttpRequests().antMatchers("/test/logout").permitAll()
+						// 加入thymeleaf後, 登入URL記得加白名單, 否則會無限遞迴
+						.and().authorizeHttpRequests().antMatchers("/main/login", "/test/logout").permitAll()
 						// 指定URL需admins角色才可登入
 //						.antMatchers("/test/hello").hasAnyAuthority("role", "admins")
 						// role權限以"ROLE_XXX"開頭
@@ -51,10 +53,8 @@ public class SecurityConfig {
 						.and().rememberMe().tokenRepository(persistentTokenRepository())
 						// 自動登入有效時間(秒)
 						.tokenValiditySeconds(60)
-						// 關閉CSRF保護
-						.and().csrf().disable()
 						// 使用自訂的登入驗證機制
-						.authenticationProvider(authenticationProvider(userDetailsService)).build();
+						.and().authenticationProvider(authenticationProvider(userDetailsService)).build();
 	}
 
 	/**
@@ -64,8 +64,8 @@ public class SecurityConfig {
 	PersistentTokenRepository persistentTokenRepository() {
 		JdbcTokenRepositoryImpl jdbcRepository = new JdbcTokenRepositoryImpl();
 		jdbcRepository.setDataSource(dataSource);
-		// 無table會自動建立
-		jdbcRepository.setCreateTableOnStartup(true);
+		// 無table會自動建立, 已建過需註解
+//		jdbcRepository.setCreateTableOnStartup(true);
 		return jdbcRepository;
 	}
 
